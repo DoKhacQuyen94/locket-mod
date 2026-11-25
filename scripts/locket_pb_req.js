@@ -1,5 +1,5 @@
 // ========= Locket AI Filter - Request Handler ========= //
-// LocketGold-DinhTuan by DoKhacQuyen
+// DoKhacQuyen (github.com/DoKhacQuyen94)
 // Chức năng:
 //   1. Map sticker ID tùy chỉnh → filter ID gốc của Locket
 //   2. Inject AI prompt đúng vào body request trước khi gửi lên server
@@ -72,6 +72,7 @@
         "bob":                   "bob_cut",
         "stk_dio_bearded":       "beard",
         "bearded":               "beard",
+        "stk_dio_bearded_holiday": "beard",
         "stk_dio_sweat_hearts":  "sweet_hearts",
         "sweat_hearts":          "sweet_hearts",
         "stk_dio_elf":           "elf_cutout",
@@ -253,6 +254,8 @@
             }
 
             body = JSON.stringify(obj);
+            delete headers["Content-Length"];
+            delete headers["content-length"];
         } catch (e) {}
     }
 

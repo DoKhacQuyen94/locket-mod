@@ -5,6 +5,18 @@
 #!homepage=https://github.com/DoKhacQuyen94/locket-mod
 #!icon=https://github.com/DoKhacQuyen94.png
 
+[Rule]
+# Chan UDP/QUIC de ep traffic di qua HTTP/TCP cho Shadowrocket MITM bat duoc
+AND,((DOMAIN,firebaseremoteconfig.googleapis.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.revenuecat.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.rc-backup.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.locketcamera.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,us-central1-locket-4252a.cloudfunctions.net),(PROTOCOL,UDP)),REJECT
+
+[Host]
+# Chan Firebase Remote Config realtime ghi de cau hinh da sua
+firebaseremoteconfigrealtime.googleapis.com = 0.0.0.0
+
 [Script]
 # [1] RevenueCat: Ghi de goi mua -> Gold, het han 2099
 revenuecat = type=http-response, pattern=^https?:\/\/api\.(revenuecat|rc-backup)\.com\/.+\/(receipts|subscribers), script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locketlam.js, requires-body=true, max-size=-1, timeout=60
@@ -19,11 +31,11 @@ locket_rc = type=http-response, pattern=^https?:\/\/firebaseremoteconfig\.google
 locket_badge = type=http-request, pattern=^https?:\/\/api\.locketcamera\.com\/changeProfileInfo, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_profile.js, timeout=60
 locket_user = type=http-response, pattern=^https?:\/\/api\.locketcamera\.com\/((users?|profiles?)\/.+|getUser.*), script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_profile.js, requires-body=true, max-size=1048576, timeout=60
 
-# [5] AI Filter Request Handler (Remap filter ID + prompt)
-locket_pb_req = type=http-request, pattern=^https?:\/\/api\.locketcamera\.com\/(generateFilteredImage|photoboothMoment|photobooth), requires-body=true, max-size=-1, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_pb_req.js, timeout=60
+# [5] AI Filter Request Handler (Remap filter ID + prompt + mock Photobooth 200)
+locket_pb_req = type=http-request, pattern=^https?:\/\/(us-central1-locket-4252a\.cloudfunctions\.net|api\.locketcamera\.com)\/(generateFilteredImage|photoboothMoment|photobooth), requires-body=true, max-size=-1, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_pb_req.js, timeout=60
 
 # [6] AI Filter Response Unlock
-locket_filter_resp = type=http-response, pattern=^https?:\/\/api\.locketcamera\.com\/generateFilteredImage, requires-body=true, max-size=-1, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_filter_resp.js, timeout=60
+locket_filter_resp = type=http-response, pattern=^https?:\/\/(us-central1-locket-4252a\.cloudfunctions\.net|api\.locketcamera\.com)\/generateFilteredImage, requires-body=true, max-size=-1, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_filter_resp.js, timeout=60
 
 [MITM]
-hostname = %APPEND% api.revenuecat.com, api.rc-backup.com, firebaseremoteconfig.googleapis.com, api.locketcamera.com
+hostname = %APPEND% api.revenuecat.com, api.rc-backup.com, firebaseremoteconfig.googleapis.com, api.locketcamera.com, us-central1-locket-4252a.cloudfunctions.net
