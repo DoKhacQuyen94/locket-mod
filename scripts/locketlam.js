@@ -63,9 +63,15 @@ obj.subscriber.subscriptions = obj.subscriber.subscriptions || {};
 obj.subscriber.entitlements  = obj.subscriber.entitlements  || {};
 
 obj.subscriber.subscriptions.locket_1600_1y = subscription;
-// Bơm cùng một entitlement dưới 3 tên khác nhau — App check tên nào cũng khớp
+obj.subscriber.subscriptions.locket_gold = subscription;
+obj.subscriber.subscriptions.locket_gold_1y = subscription;
+
+// Bơm toàn bộ các tên entitlement phổ biến — App check tên nào cũng khớp
 obj.subscriber.entitlements.Gold = entitlement;
+obj.subscriber.entitlements.gold = entitlement;
+obj.subscriber.entitlements.locket_gold = entitlement;
 obj.subscriber.entitlements.pro  = entitlement;
 obj.subscriber.entitlements.vip  = entitlement;
+obj.subscriber.entitlements.premium = entitlement;
 
 $done({ body: JSON.stringify(obj) });
