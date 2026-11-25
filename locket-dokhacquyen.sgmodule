@@ -5,19 +5,63 @@
 #!homepage=https://github.com/DoKhacQuyen94/locket-mod
 #!icon=https://github.com/DoKhacQuyen94.png
 
+[Rule]
+# Chan QUIC/UDP cho Locket (buoc chay TCP HTTPS de Shadowrocket khong bi sot goi tin)
+AND,((DOMAIN,firebaseremoteconfig.googleapis.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.revenuecat.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.locketcamera.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN-SUFFIX,locketcamera.com),(PROTOCOL,UDP)),REJECT
+
+# Chan Sentry (chong gui telemetry / crash log)
+DOMAIN-SUFFIX,sentry.io,REJECT
+DOMAIN-SUFFIX,ingest.sentry.io,REJECT
+
+[Header Rewrite]
+# Xoa Cache / ETag tren RevenueCat
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del x-revenuecat-etag
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del X-RevenueCat-ETag
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del if-none-match
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del If-None-Match
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del if-modified-since
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del If-Modified-Since
+
+# Xoa Cache / ETag tren Firebase Remote Config
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+ header-del if-none-match
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+ header-del If-None-Match
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+ header-del if-modified-since
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+ header-del If-Modified-Since
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+ header-del x-goog-if-none-match
+
+# Xoa Cache / ETag tren Locket Camera API
+^https?:\/\/api\.locketcamera\.com\/.+ header-del if-none-match
+^https?:\/\/api\.locketcamera\.com\/.+ header-del If-None-Match
+^https?:\/\/api\.locketcamera\.com\/.+ header-del if-modified-since
+^https?:\/\/api\.locketcamera\.com\/.+ header-del If-Modified-Since
+
 [Script]
-# RevenueCat: ghi de goi mua -> Gold, het han 2099
-revenuecat = type=http-response, pattern=^https:\/\/api\.(revenuecat|rc-backup)\.com\/.+\/(receipts$|subscribers\/[^/]+$), script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locketlam.js, requires-body=true, max-size=-1, timeout=60
+# [1] Xoa Header RevenueCat
+deleteHeader_RC = type=http-request, pattern=^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers), script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/deleteHeader_RC.js, timeout=60
 
-# Xoa ETag / If-None-Match de server tra 200 thay vi 304
-deleteHeader = type=http-request, pattern=^https:\/\/api\.(revenuecat|rc-backup)\.com\/.+\/(receipts|subscribers), script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/deleteHeader.js, timeout=60
+# [2] Xoa Header Firebase
+deleteHeader_Firebase = type=http-request, pattern=^https?:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/deleteHeader_Firebase.js, timeout=60
 
-# Firebase Remote Config: bat toan bo feature gate
+# [3] AI Filter Request Handler (Remap filter ID + inject AI prompt)
+locket_pb_req = type=http-request, pattern=^https?:\/\/api\.locketcamera\.com\/(generateFilteredImage|photoboothMoment|photobooth), requires-body=true, max-size=-1, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_pb_req.js, timeout=60
+
+# [4] RevenueCat: Ghi de goi mua -> Gold, het han 2099
+revenuecat = type=http-response, pattern=^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers), script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locketlam.js, requires-body=true, max-size=-1, timeout=60
+
+# [5] Firebase Remote Config: Bat toan bo feature gate + AI Filter
 locket_rc = type=http-response, pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_remote.js, requires-body=true, max-size=-1, timeout=60
 
-# Badge Gold tren profile
-locket_badge = type=http-request, pattern=^https:\/\/api\.locketcamera\.com\/changeProfileInfo, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_profile.js, timeout=60
-locket_user = type=http-response, pattern=^https:\/\/api\.locketcamera\.com\/.+, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_profile.js, requires-body=true, max-size=-1, timeout=60
+# [6] Huy hieu Profile Gold
+locket_change_profile = type=http-request, pattern=^https:\/\/api\.locketcamera\.com\/changeProfileInfo, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_change_profile.js, timeout=60
+
+# [7] Locket API Response: Unblur + VIP Gold + AI Filter Unlock
+locket_filter_resp = type=http-response, pattern=^https?:\/\/api\.locketcamera\.com\/.+, requires-body=true, max-size=-1, script-path=https://raw.githubusercontent.com/DoKhacQuyen94/locket-mod/main/scripts/locket_filter_resp.js, timeout=60
+
+[Host]
+firebaseremoteconfigrealtime.googleapis.com = 0.0.0.0
 
 [MITM]
-hostname = %APPEND% api.revenuecat.com, api.rc-backup.com, firebaseremoteconfig.googleapis.com, api.locketcamera.com
+hostname = %APPEND% api.revenuecat.com, firebaseremoteconfig.googleapis.com, api.locketcamera.com, *.locketcamera.com

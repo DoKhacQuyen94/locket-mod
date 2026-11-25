@@ -34,6 +34,7 @@ if (obj && typeof obj === "object") {
   obj.entries = obj.entries || {};
   Object.assign(obj.entries, {
     feature_gates: JSON.stringify({
+      ai_filters: "enabled",
       app_icon_picker: "enabled",
       camera_roll: "enabled",
       camera_theme: "enabled",
@@ -49,6 +50,7 @@ if (obj && typeof obj === "object") {
       streak_recovery: "enabled"
     }),
     upsell_features: JSON.stringify({
+      ai_filters: true,
       app_icon_picker: true,
       camera_roll: true,
       camera_theme: true,
@@ -80,6 +82,9 @@ if (obj && typeof obj === "object") {
       end_at: "3000-12-31T23:59:59",
       use_local_time_zone: true
     }),
+    ai_filters_enabled: "true",
+    ai_filters_gold_only: "false",
+    ai_filters_require_gold: "false",
     profile_badge_visible: "true",
     beta_features_enabled: "true",
     link_caption_link_enabled: "true",
@@ -151,42 +156,12 @@ if (obj && typeof obj === "object") {
       widget_looping_mode: "never"
     }),
     camera_filter_config: JSON.stringify({
-      allows_custom_filters: true,
-      show_filter_button: true,
-      sheet_enabled: true,
-      open_sheet_immediately: true,
-      sheet_filters: [{
-        title: {
-          en: "Goofy"
-        },
-        filter_ids: ["okay_wig", "influencer", "looks_maxxing", "toothless", "bye_brows"]
-      }, {
-        title: {
-          en: "Looks"
-        },
-        filter_ids: ["bowling_ball", "blonde_bleached", "beard", "bob_cut", "buns", "tatted", "mohawk", "braces", "bye_brows"]
-      }, {
-        title: {
-          en: "Celebrate"
-        },
-        filter_ids: ["slimed", "princess", "disco_lights", "cash_money", "happy_birthday"]
-      }, {
-        title: {
-          en: "Cute"
-        },
-        filter_ids: ["cutesy", "sticker_face", "flower_crown", "love_bug"]
-      }, {
-        title: {
-          en: "Costumes"
-        },
-        filter_ids: ["wedding", "cowboy_cowgirl", "giraffe", "clown"]
-      }, {
-        title: {
-          en: "Holidays"
-        },
-        filter_ids: ["easter_bunney_cutout", "easter_chick_cutout", "bearded", "leprechaun", "lucky_face", "sweet_hearts", "elf_cutout", "santa_cutout", "frosty"]
-      }],
-      picker_filters: ["okay_wig", "influencer", "looks_maxxing", "toothless", "bye_brows", "bowling_ball", "blonde_bleached", "beard", "bob_cut", "buns", "tatted", "mohawk", "braces", "slimed", "princess", "disco_lights", "cash_money", "happy_birthday", "cutesy", "sticker_face", "flower_crown", "love_bug", "wedding", "cowboy_cowgirl", "giraffe", "clown", "easter_bunney_cutout", "easter_chick_cutout", "bearded", "leprechaun", "lucky_face", "sweet_hearts", "elf_cutout", "santa_cutout", "frosty"]
+      allows_custom_filters: false,
+      show_filter_button: false,
+      sheet_enabled: false,
+      open_sheet_immediately: false,
+      sheet_filters: [],
+      picker_filters: []
     }),
     camera_roll_preview_enabled: "true",
     camera_roll_video_enabled: "true",
